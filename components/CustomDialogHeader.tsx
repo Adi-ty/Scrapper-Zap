@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 
-interface props {
+interface Props {
     title?: string;
     subTitle?: string;
     icon?: LucideIcon;
@@ -14,7 +14,7 @@ interface props {
     subTitleClassName?: string;
 }
 
-function CustomDialogHeader(props: props) {
+function CustomDialogHeader(props: Props) {
     return (
         <DialogHeader className="py-6">
             <DialogTitle asChild>

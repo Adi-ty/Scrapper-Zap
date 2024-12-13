@@ -20,6 +20,9 @@ const nodeTypes = {
     ScraperZapNode: NodeComponent,
 };
 
+const snapGrid: [number, number] = [16, 16];
+const fitViewOptions = { padding: 1 };
+
 function FlowEditor({ workflow }: { workflow: Workflow }) {
     const [nodes, setNodes, onNodesChange] = useNodesState([
         CreateFlowNode(TaskType.LAUNCH_BROWSER),
@@ -34,6 +37,10 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
                 onEdgesChange={onEdgesChange}
                 onNodesChange={onNodesChange}
                 nodeTypes={nodeTypes}
+                snapGrid={snapGrid}
+                fitViewOptions={fitViewOptions}
+                snapToGrid
+                fitView
             >
                 <MiniMap
                     position="top-right"
@@ -41,8 +48,12 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
                     pannable
                     zoomable
                 />
-                <Controls position="top-left" />
-                <Background gap={24} variant={BackgroundVariant.Dots} />
+                <Controls position="top-left" fitViewOptions={fitViewOptions} />
+                <Background
+                    gap={16}
+                    size={1}
+                    variant={BackgroundVariant.Dots}
+                />
             </ReactFlow>
         </main>
     );

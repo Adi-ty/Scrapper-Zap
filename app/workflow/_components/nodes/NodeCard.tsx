@@ -23,9 +23,11 @@ function NodeCard({
                 const { position, measured } = node;
                 if (!position || !measured) return;
                 const { width, height } = measured;
+                // Calculate the center of the node
                 const x = position.x + width! / 2;
                 const y = position.y + height! / 2;
                 if (x === undefined || y === undefined) return;
+                // Center the view on the node
                 setCenter(x, y, {
                     zoom: 1,
                     duration: 500,

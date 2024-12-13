@@ -21,12 +21,12 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Layers2, Loader2 } from "lucide-react";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 function CreateWorkflowDialog({ triggerText }: { triggerText?: string }) {
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = useState(false);
 
     const form = useForm<createWorkflowSchemaType>({
         resolver: zodResolver(createWorkflowSchema),

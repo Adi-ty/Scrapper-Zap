@@ -1,9 +1,12 @@
 "use client";
 import { Workflow } from "@prisma/client";
 import {
+    addEdge,
     Background,
     BackgroundVariant,
+    Connection,
     Controls,
+    Edge,
     MiniMap,
     ReactFlow,
     useEdgesState,
@@ -27,7 +30,7 @@ const fitViewOptions = { padding: 1 };
 
 function FlowEditor({ workflow }: { workflow: Workflow }) {
     const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([]);
-    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+    const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
     const { setViewport, screenToFlowPosition } = useReactFlow();
 
     useEffect(() => {
@@ -63,6 +66,10 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
         setNodes((prev) => prev.concat(newNode));
     }, []);
 
+    const onConnect = useCallback((connection: Connection) => {
+        setEdges((eds) => addEdge({ ...connection, animated: true }, eds));
+    }, []);
+
     return (
         <main className="h-full w-full">
             <ReactFlow
@@ -77,6 +84,7 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
                 fitView
                 onDragOver={onDragOver}
                 onDrop={onDrop}
+                onConnect={onConnect}
             >
                 <MiniMap
                     position="top-right"

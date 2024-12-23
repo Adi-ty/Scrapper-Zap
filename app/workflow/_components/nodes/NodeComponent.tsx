@@ -5,6 +5,7 @@ import { memo } from "react";
 import NodeCard from "./NodeCard";
 import NodeHeader from "./NodeHeader";
 import { NodeInput, NodeInputs } from "./NodeInputs";
+import { NodeOutput, NodeOutputs } from "./NodeOutputs";
 
 const NodeComponent = memo((props: NodeProps) => {
     const nodeData = props.data as AppNodeData;
@@ -23,6 +24,12 @@ const NodeComponent = memo((props: NodeProps) => {
                     />
                 ))}
             </NodeInputs>
+
+            <NodeOutputs>
+                {task.outputs.map((output) => (
+                    <NodeOutput key={output.name} output={output} />
+                ))}
+            </NodeOutputs>
         </NodeCard>
     );
 });

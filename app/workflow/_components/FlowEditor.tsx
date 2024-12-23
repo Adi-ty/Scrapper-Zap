@@ -13,7 +13,10 @@ import {
 
 import "@xyflow/react/dist/style.css";
 import NodeComponent from "./nodes/NodeComponent";
-import { useEffect } from "react";
+import { DragEvent, useCallback, useEffect } from "react";
+import { CreateFlowNode } from "@/lib/workflow/createFlowNode";
+import { TaskType } from "@/types/task";
+import { AppNode } from "@/types/appNode";
 
 const nodeTypes = {
     ScraperZapNode: NodeComponent,
@@ -23,7 +26,7 @@ const snapGrid: [number, number] = [16, 16];
 const fitViewOptions = { padding: 1 };
 
 function FlowEditor({ workflow }: { workflow: Workflow }) {
-    const [nodes, setNodes, onNodesChange] = useNodesState([]);
+    const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const { setViewport } = useReactFlow();
 
@@ -41,6 +44,20 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
         } catch (error) {}
     }, [workflow.definition, setNodes, setEdges, setViewport]);
 
+    const onDragOver = useCallback((event: DragEvent) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+    }, []);
+
+    const onDrop = useCallback((event: DragEvent) => {
+        event.preventDefault();
+        const taskType = event.dataTransfer.getData("application/reactflow");
+        if (typeof taskType === undefined || !taskType) return;
+
+        const newNode = CreateFlowNode(taskType as TaskType);
+        setNodes((prev) => prev.concat(newNode));
+    }, []);
+
     return (
         <main className="h-full w-full">
             <ReactFlow
@@ -53,6 +70,8 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
                 fitViewOptions={fitViewOptions}
                 snapToGrid
                 fitView
+                onDragOver={onDragOver}
+                onDrop={onDrop}
             >
                 <MiniMap
                     position="top-right"

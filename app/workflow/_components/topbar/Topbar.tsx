@@ -15,7 +15,7 @@ export default function Topbar({ title, workflowId }: Props) {
     const router = useRouter();
     return (
         <header
-            className="flex p-2 border-p-2 border-separate 
+            className="flex p-2 border-b-2 border-separate 
         justify-between w-full h-[60px] sticky top-0 bg-background 
         z-10"
         >

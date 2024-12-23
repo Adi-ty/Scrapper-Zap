@@ -20,9 +20,14 @@ import { DragEvent, useCallback, useEffect } from "react";
 import { CreateFlowNode } from "@/lib/workflow/createFlowNode";
 import { TaskType } from "@/types/task";
 import { AppNode } from "@/types/appNode";
+import DeletableEdge from "./edges/DeletableEdge";
 
 const nodeTypes = {
     ScraperZapNode: NodeComponent,
+};
+
+const edgeTypes = {
+    default: DeletableEdge,
 };
 
 const snapGrid: [number, number] = [16, 16];
@@ -78,6 +83,7 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
                 onEdgesChange={onEdgesChange}
                 onNodesChange={onNodesChange}
                 nodeTypes={nodeTypes}
+                edgeTypes={edgeTypes}
                 snapGrid={snapGrid}
                 fitViewOptions={fitViewOptions}
                 snapToGrid

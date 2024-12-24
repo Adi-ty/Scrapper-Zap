@@ -7,6 +7,7 @@ import {
     Connection,
     Controls,
     Edge,
+    getOutgoers,
     MiniMap,
     ReactFlow,
     useEdgesState,
@@ -120,9 +121,23 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
 
             if (input?.type !== output?.type) return false; // Input and output type mismatch
 
-            return true;
+            // Prevent connecting if it creates a cycle
+            // https://reactflow.dev/examples/interaction/prevent-cycles - Implementation reference
+            const hasCycle = (node: AppNode, visited = new Set()) => {
+                if (visited.has(node.id)) return true;
+                visited.add(node.id);
+
+                for (const outgoer of getOutgoers(node, nodes, edges)) {
+                    if (outgoer.id === connection.source) return true;
+                    if (hasCycle(outgoer, visited)) return true;
+                }
+            };
+
+            const detectedCycle = hasCycle(targetNode);
+
+            return !detectedCycle;
         },
-        [nodes]
+        [nodes, edges]
     );
 
     return (

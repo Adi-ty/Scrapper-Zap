@@ -58,19 +58,24 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
         event.dataTransfer.dropEffect = "move";
     }, []);
 
-    const onDrop = useCallback((event: DragEvent) => {
-        event.preventDefault();
-        const taskType = event.dataTransfer.getData("application/reactflow");
-        if (typeof taskType === undefined || !taskType) return;
+    const onDrop = useCallback(
+        (event: DragEvent) => {
+            event.preventDefault();
+            const taskType = event.dataTransfer.getData(
+                "application/reactflow"
+            );
+            if (typeof taskType === undefined || !taskType) return;
 
-        const position = screenToFlowPosition({
-            x: event.clientX,
-            y: event.clientY,
-        });
+            const position = screenToFlowPosition({
+                x: event.clientX,
+                y: event.clientY,
+            });
 
-        const newNode = CreateFlowNode(taskType as TaskType, position);
-        setNodes((prev) => prev.concat(newNode));
-    }, []);
+            const newNode = CreateFlowNode(taskType as TaskType, position);
+            setNodes((prev) => prev.concat(newNode));
+        },
+        [screenToFlowPosition, setNodes]
+    );
 
     const onConnect = useCallback(
         (connection: Connection) => {

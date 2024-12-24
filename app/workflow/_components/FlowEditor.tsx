@@ -80,8 +80,6 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
             const node = nodes.find((nd) => nd.id === connection.target);
             if (!node) return;
             const nodeInputs = node.data.inputs;
-            console.log("@NODE", node);
-            console.log("@NODE INPUTS", nodeInputs);
             updateNodeData(node.id, {
                 inputs: {
                     ...nodeInputs,
@@ -89,7 +87,7 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
                 },
             });
         },
-        [setEdges, updateNodeData]
+        [setEdges, updateNodeData, nodes]
     );
 
     return (

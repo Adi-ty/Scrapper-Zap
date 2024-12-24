@@ -14,7 +14,7 @@ const NodeComponent = memo((props: NodeProps) => {
     return (
         <NodeCard nodeId={props.id} isSelected={!!props.selected}>
             {/* The !! syntax converts the value of props.selected to a boolean */}
-            <NodeHeader taskType={nodeData.type} />
+            <NodeHeader taskType={nodeData.type} nodeId={props.id} />
             <NodeInputs>
                 {task.inputs.map((input) => (
                     <NodeInput

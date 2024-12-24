@@ -21,6 +21,7 @@ import { CreateFlowNode } from "@/lib/workflow/createFlowNode";
 import { TaskType } from "@/types/task";
 import { AppNode } from "@/types/appNode";
 import DeletableEdge from "./edges/DeletableEdge";
+import { TaskRegistry } from "@/lib/workflow/task/registry";
 
 const nodeTypes = {
     ScraperZapNode: NodeComponent,
@@ -95,6 +96,35 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
         [setEdges, updateNodeData, nodes]
     );
 
+    const isValidConnection = useCallback(
+        (connection: Edge | Connection) => {
+            // Prevent connecting to the same node
+            if (connection.source === connection.target) return false;
+
+            // Prevent connecting if taskParam is not of same type
+            const sourceNode = nodes.find(
+                (node) => node.id === connection.source
+            );
+            const targetNode = nodes.find(
+                (node) => node.id === connection.target
+            );
+            if (!sourceNode || !targetNode) return false; // Source or target node not found
+            const sourceTask = TaskRegistry[sourceNode.data.type];
+            const targetTask = TaskRegistry[targetNode.data.type];
+            const output = sourceTask.outputs.find(
+                (out) => out.name === connection.sourceHandle
+            );
+            const input = targetTask.inputs.find(
+                (inp) => inp.name === connection.targetHandle
+            );
+
+            if (input?.type !== output?.type) return false; // Input and output type mismatch
+
+            return true;
+        },
+        [nodes]
+    );
+
     return (
         <main className="h-full w-full">
             <ReactFlow
@@ -111,6 +141,7 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
                 onDragOver={onDragOver}
                 onDrop={onDrop}
                 onConnect={onConnect}
+                isValidConnection={isValidConnection}
             >
                 <MiniMap
                     position="top-right"

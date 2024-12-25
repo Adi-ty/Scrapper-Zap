@@ -10,9 +10,14 @@ import ExecuteButton from "./ExecuteButton";
 interface Props {
     title?: string;
     workflowId: string;
+    hideButtons?: boolean;
 }
 
-export default function Topbar({ title, workflowId }: Props) {
+export default function Topbar({
+    title,
+    workflowId,
+    hideButtons = false,
+}: Props) {
     const router = useRouter();
     return (
         <header
@@ -38,8 +43,12 @@ export default function Topbar({ title, workflowId }: Props) {
                 )}
             </div>
             <div className="flex gap-1 flex-1 justify-end">
-                <ExecuteButton workflowId={workflowId} />
-                <SaveButton workflowId={workflowId} />
+                {!hideButtons && (
+                    <>
+                        <ExecuteButton workflowId={workflowId} />
+                        <SaveButton workflowId={workflowId} />
+                    </>
+                )}
             </div>
         </header>
     );

@@ -24,6 +24,41 @@ model Workflow {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  executions WorkflowExecution[]
+
   // A user cannot have 2 workflows with same name
   @@unique([name, userId])
+}
+
+model WorkflowExecution {
+  id String @id @default(cuid())
+  workflowId String
+  userId String // Adding user in workflow execution also to avoid joins
+  trigger String // "manual" or "cron"
+  status String // "pending", "completed", "failed"
+  createdAt DateTime @default(now())
+  startedAt DateTime?
+  completedAt DateTime?
+
+  phases ExecutionPhase[]
+
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+}
+
+model ExecutionPhase {
+  id String @id @default(cuid())
+  userId String
+  status String
+  number Int // Phase no of the execution plan
+  node String
+  name String
+  startedAt DateTime?
+  completedAt DateTime?
+  inputs String?
+  outputs String?
+
+  creditsCost Int?
+
+  workflowExecutionId String
+  execution WorkflowExecution @relation(fields: [workflowExecutionId], references: [id], onDelete: Cascade)
 }

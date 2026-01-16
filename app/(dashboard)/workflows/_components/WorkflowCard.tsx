@@ -27,7 +27,7 @@ import DeleteWorkflowDialog from "./DeleteWorkflowDialog";
 
 const statusColors = {
     [WorkflowStatus.DRAFT]: "bg-rose-400 text-rose-600",
-    [WorkflowStatus.PUBLISHED]: "bg-primary",
+    [WorkflowStatus.PUBLISHED]: "bg-green-500",
 };
 
 function WorkflowCard({ workflow }: { workflow: Workflow }) {

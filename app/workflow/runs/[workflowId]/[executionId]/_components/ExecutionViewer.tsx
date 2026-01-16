@@ -213,7 +213,9 @@ export default function ExecutionViewer({
                                     />
                                     <span>Credits</span>
                                 </div>
-                                <span>TODO</span>
+                                <span>
+                                    {phaseDetails.data?.creditsConsumed}
+                                </span>
                             </Badge>
                             <Badge variant={"outline"} className="space-x-4">
                                 <div className="flex gap-1 items-center">

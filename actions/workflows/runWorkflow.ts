@@ -33,11 +33,13 @@ export async function RunWorkflow(form: {
     if (!workflow) throw new Error("Workflow not found");
 
     let executionPlan: WorkflowExecutionPlan;
+    let workflowDefintion = flowDefinition;
     if (workflow.status === WorkflowStatus.PUBLISHED) {
         if (!workflow.executionPlan)
             throw new Error("No execution plan found for published workflow");
 
         executionPlan = JSON.parse(workflow.executionPlan!);
+        workflowDefintion = workflow.definition!;
     } else {
         // workflow is a draft
         if (!flowDefinition) {
@@ -61,7 +63,7 @@ export async function RunWorkflow(form: {
             status: WorkflowExecutionStatus.PENDING,
             startedAt: new Date(),
             trigger: WorkflowExecutionTrigger.MANUAL,
-            definition: flowDefinition,
+            definition: workflowDefintion,
             phases: {
                 create: executionPlan.flatMap((phase) => {
                     return phase.nodes.flatMap((node) => {

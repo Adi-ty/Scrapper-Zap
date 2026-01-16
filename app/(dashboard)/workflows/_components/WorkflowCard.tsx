@@ -1,19 +1,8 @@
 "use client";
 
+import TooltipWrapper from "@/components/TooltipWrapper";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { WorkflowStatus } from "@/types/workflow";
-import { Workflow } from "@prisma/client";
-import {
-    FileTextIcon,
-    MoreVerticalIcon,
-    PlayIcon,
-    ShuffleIcon,
-    TrashIcon,
-} from "lucide-react";
-import Link from "next/link";
-import React, { useState } from "react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -22,8 +11,26 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import TooltipWrapper from "@/components/TooltipWrapper";
+import { cn } from "@/lib/utils";
+import { WorkflowStatus } from "@/types/workflow";
+import { Workflow } from "@prisma/client";
+import {
+    ArrowRightIcon,
+    ArrowUpRightSquare,
+    CoinsIcon,
+    CornerDownRight,
+    FileTextIcon,
+    MoreVerticalIcon,
+    PlayIcon,
+    ShuffleIcon,
+    TrashIcon,
+} from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 import DeleteWorkflowDialog from "./DeleteWorkflowDialog";
+import RunBtn from "./RunBtn";
+import ScheduleDialog from "./ScheduleDialog";
+import { Badge } from "@/components/ui/badge";
 
 const statusColors = {
     [WorkflowStatus.DRAFT]: "bg-rose-400 text-rose-600",
@@ -40,7 +47,7 @@ function WorkflowCard({ workflow }: { workflow: Workflow }) {
                     <div
                         className={cn(
                             "w-10 h-10 rounded-full flex items-center justify-center",
-                            statusColors[workflow.status as WorkflowStatus]
+                            statusColors[workflow.status as WorkflowStatus],
                         )}
                     >
                         {isDraft ? (
@@ -63,9 +70,16 @@ function WorkflowCard({ workflow }: { workflow: Workflow }) {
                                 </span>
                             )}
                         </h3>
+                        <ScheduleSection
+                            isDraft={isDraft}
+                            creditsConsumed={workflow.creditsConsumed}
+                            workflowId={workflow.id}
+                            cron={workflow.cron}
+                        />
                     </div>
                 </div>
                 <div className="flex items-center space-x-2">
+                    {!isDraft && <RunBtn workflowId={workflow.id} />}
                     <Link
                         href={`/workflow/editor/${workflow.id}`}
                         className={cn(
@@ -73,7 +87,7 @@ function WorkflowCard({ workflow }: { workflow: Workflow }) {
                                 variant: "outline",
                                 size: "sm",
                             }),
-                            "flex items-center gap-2"
+                            "flex items-center gap-2",
                         )}
                     >
                         <ShuffleIcon size={16} />
@@ -130,6 +144,43 @@ function WorkflowActions({
                 <DropdownMenuSeparator />
             </DropdownMenu>
         </>
+    );
+}
+
+function ScheduleSection({
+    isDraft,
+    creditsConsumed,
+    workflowId,
+    cron,
+}: {
+    isDraft?: boolean;
+    creditsConsumed?: number;
+    workflowId: string;
+    cron: string | null;
+}) {
+    if (isDraft) return null;
+
+    return (
+        <div className="flex items-center gap-2">
+            <CornerDownRight className="h-4 w-4 text-muted-foreground" />
+            <ScheduleDialog
+                workflowId={workflowId}
+                cron={cron}
+                key={`${cron}-${workflowId}`}
+            />
+            <ArrowRightIcon className="h-4 w-4 text-muted-foreground" />
+            <TooltipWrapper content="Credit consumption for full run">
+                <div className="flex items-center gap-3">
+                    <Badge
+                        variant={"outline"}
+                        className="space-x-2 text-muted-foreground rounded-sm"
+                    >
+                        <CoinsIcon className="h-4 w-4" />
+                        <span className="text-sm">{creditsConsumed}</span>
+                    </Badge>
+                </div>
+            </TooltipWrapper>
+        </div>
     );
 }
 

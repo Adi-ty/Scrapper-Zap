@@ -1,18 +1,20 @@
-import "server-only";
 import prisma from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { ExecutorRegistry } from "@/lib/workflow/executor/registry";
+import { TaskRegistry } from "@/lib/workflow/task/registry";
+import { AppNode } from "@/types/appNode";
+import { Environment, ExecutionEnvironment } from "@/types/executor";
+import { LogCollector } from "@/types/log";
+import { TaskParamType } from "@/types/task";
 import {
     ExecutionPhaseStatus,
     WorkflowExecutionStatus,
 } from "@/types/workflow";
 import { ExecutionPhase } from "@prisma/client";
-import { AppNode } from "@/types/appNode";
-import { TaskRegistry } from "@/lib/workflow/task/registry";
-import { ExecutorRegistry } from "@/lib/workflow/executor/registry";
-import { Environment, ExecutionEnvironment } from "@/types/executor";
-import { TaskParamType } from "@/types/task";
-import { Browser, Page } from "puppeteer";
 import { Edge } from "@xyflow/react";
+import { revalidatePath } from "next/cache";
+import { Browser, Page } from "puppeteer";
+import "server-only";
+import { createLogCollector } from "./log";
 
 export async function ExecuteWorkflow(executionId: string) {
     const execution = await prisma.workflowExecution.findUnique({
@@ -35,6 +37,7 @@ export async function ExecuteWorkflow(executionId: string) {
     let executionFailed = false;
     for (const phase of execution.phases) {
         // TODO: consumed credits
+
         const phaseExecution = await executeWorkflowPhase(
             phase,
             environment,
@@ -136,6 +139,7 @@ async function executeWorkflowPhase(
     environment: Environment,
     edges: Edge[]
 ) {
+    const logCollector = createLogCollector();
     const startedAt = new Date();
     const node = JSON.parse(phase.node) as AppNode;
     setUpEnvironmentForPhase(node, environment, edges);
@@ -156,14 +160,19 @@ async function executeWorkflowPhase(
     );
 
     // TODO: decrement user credits balance
-    const success = await executePhase(phase, node, environment);
+    const success = await executePhase(phase, node, environment, logCollector);
 
     const outputs = environment.phases[node.id].outputs;
-    await finalizePhase(phase.id, success, outputs);
+    await finalizePhase(phase.id, success, outputs, logCollector);
     return { success };
 }
 
-async function finalizePhase(phaseId: string, success: boolean, outputs: any) {
+async function finalizePhase(
+    phaseId: string,
+    success: boolean,
+    outputs: any,
+    logCollector: LogCollector
+) {
     const finalStatus = success
         ? ExecutionPhaseStatus.COMPLETED
         : ExecutionPhaseStatus.FAILED;
@@ -174,6 +183,15 @@ async function finalizePhase(phaseId: string, success: boolean, outputs: any) {
             status: finalStatus,
             completedAt: new Date(),
             outputs: JSON.stringify(outputs),
+            logs: {
+                createMany: {
+                    data: logCollector.getAll().map((log) => ({
+                        message: log.message,
+                        logLevel: log.level,
+                        timestamp: log.timestamp,
+                    })),
+                },
+            },
         },
     });
 }
@@ -181,13 +199,14 @@ async function finalizePhase(phaseId: string, success: boolean, outputs: any) {
 async function executePhase(
     phase: ExecutionPhase,
     node: AppNode,
-    environment: Environment
+    environment: Environment,
+    logCollector: LogCollector
 ): Promise<boolean> {
     const runFn = ExecutorRegistry[node.data.type];
     if (!runFn) return false;
 
     const executionEnvironment: ExecutionEnvironment<any> =
-        createExecutionEnvironment(node, environment);
+        createExecutionEnvironment(node, environment, logCollector);
 
     return await runFn(executionEnvironment);
 }
@@ -233,7 +252,8 @@ function setUpEnvironmentForPhase(
 
 function createExecutionEnvironment(
     node: AppNode,
-    environment: Environment
+    environment: Environment,
+    logCollector: LogCollector
 ): ExecutionEnvironment<any> {
     return {
         getInput(name: string): string {
@@ -246,6 +266,7 @@ function createExecutionEnvironment(
         setBrowser: (browser: Browser) => (environment.browser = browser),
         getPage: () => environment.page,
         setPage: (page: Page) => (environment.page = page),
+        log: logCollector,
     };
 }
 

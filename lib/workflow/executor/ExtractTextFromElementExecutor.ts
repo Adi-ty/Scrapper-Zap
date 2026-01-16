@@ -7,30 +7,36 @@ export async function ExtractTextFromElementExecutor(
 ): Promise<boolean> {
     try {
         const selector = environment.getInput("Selector");
-        if (!selector) return false;
+        if (!selector) {
+            environment.log.error("Selector input is missing");
+            return false;
+        }
 
         const html = environment.getInput("Html");
-        if (!html) return false;
+        if (!html) {
+            environment.log.error("Html input is missing");
+            return false;
+        }
 
         const $ = cheerio.load(html);
         const element = $(selector);
 
         if (!element) {
-            console.error("Element not found");
+            environment.log.error("Element not found");
             return false;
         }
 
         const extractedText = $.text(element);
         if (!extractedText) {
-            console.error("No text found in the element");
+            environment.log.error("No text found in the element");
             return false;
         }
 
         environment.setOutput("Extracted text", extractedText);
 
         return true;
-    } catch (error) {
-        console.error("Error launching browser:", error);
+    } catch (error: any) {
+        environment.log.error(error.message);
         return false;
     }
 }

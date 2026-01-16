@@ -168,7 +168,7 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
                 <Background
                     gap={16}
                     size={1}
-                    variant={BackgroundVariant.Dots}
+                    variant={BackgroundVariant.Lines}
                 />
             </ReactFlow>
         </main>

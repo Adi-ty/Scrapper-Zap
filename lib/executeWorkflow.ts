@@ -16,7 +16,7 @@ import { Browser, Page } from "puppeteer";
 import "server-only";
 import { createLogCollector } from "./log";
 
-export async function ExecuteWorkflow(executionId: string) {
+export async function ExecuteWorkflow(executionId: string, nextRunAt?: Date) {
     const execution = await prisma.workflowExecution.findUnique({
         where: {
             id: executionId,
@@ -30,7 +30,11 @@ export async function ExecuteWorkflow(executionId: string) {
 
     const environment: Environment = { phases: {} };
 
-    await initializeWorkflowExecution(executionId, execution.workflowId);
+    await initializeWorkflowExecution(
+        executionId,
+        execution.workflowId,
+        nextRunAt,
+    );
     await initializePhaseStatuses(execution);
 
     let creditsConsumed = 0;
@@ -40,7 +44,7 @@ export async function ExecuteWorkflow(executionId: string) {
             phase,
             environment,
             edges,
-            execution.userId
+            execution.userId,
         );
         creditsConsumed += phaseExecution.creditsConsumed;
         if (!phaseExecution.success) {
@@ -53,7 +57,7 @@ export async function ExecuteWorkflow(executionId: string) {
         executionId,
         execution.workflowId,
         executionFailed,
-        creditsConsumed
+        creditsConsumed,
     );
 
     await cleanUpEnvironment(environment);
@@ -63,7 +67,8 @@ export async function ExecuteWorkflow(executionId: string) {
 
 async function initializeWorkflowExecution(
     executionId: string,
-    workflowId: string
+    workflowId: string,
+    nextRunAt?: Date,
 ) {
     await prisma.workflowExecution.update({
         where: { id: executionId },
@@ -79,6 +84,7 @@ async function initializeWorkflowExecution(
             lastRunAt: new Date(),
             lastRunStatus: WorkflowExecutionStatus.RUNNING,
             lastRunId: executionId,
+            ...(nextRunAt && { nextRunAt }), // set next run if provided
         },
     });
 }
@@ -100,7 +106,7 @@ async function finalizeWorkflowExecution(
     executionId: string,
     workflowId: string,
     executionFailed: boolean,
-    creditsConsumed: number
+    creditsConsumed: number,
 ) {
     const finalStatus = executionFailed
         ? WorkflowExecutionStatus.FAILED
@@ -138,7 +144,7 @@ async function executeWorkflowPhase(
     phase: ExecutionPhase,
     environment: Environment,
     edges: Edge[],
-    userId: string
+    userId: string,
 ) {
     const logCollector = createLogCollector();
     const startedAt = new Date();
@@ -160,7 +166,7 @@ async function executeWorkflowPhase(
     let success = await decrementUserCredits(
         userId,
         creditsRequired,
-        logCollector
+        logCollector,
     );
     const creditsConsumed = success ? creditsRequired : 0;
 
@@ -175,7 +181,7 @@ async function executeWorkflowPhase(
         success,
         outputs,
         logCollector,
-        creditsConsumed
+        creditsConsumed,
     );
     return { success, creditsConsumed };
 }
@@ -185,7 +191,7 @@ async function finalizePhase(
     success: boolean,
     outputs: any,
     logCollector: LogCollector,
-    creditsConsumed: number
+    creditsConsumed: number,
 ) {
     const finalStatus = success
         ? ExecutionPhaseStatus.COMPLETED
@@ -215,7 +221,7 @@ async function executePhase(
     phase: ExecutionPhase,
     node: AppNode,
     environment: Environment,
-    logCollector: LogCollector
+    logCollector: LogCollector,
 ): Promise<boolean> {
     const runFn = ExecutorRegistry[node.data.type];
     if (!runFn) return false;
@@ -229,7 +235,7 @@ async function executePhase(
 function setUpEnvironmentForPhase(
     node: AppNode,
     environment: Environment,
-    edges: Edge[]
+    edges: Edge[],
 ) {
     environment.phases[node.id] = {
         inputs: {},
@@ -249,7 +255,7 @@ function setUpEnvironmentForPhase(
         // Get input value from outputs in the environment
         const connectedEdge = edges.find(
             (edge) =>
-                edge.target === node.id && edge.targetHandle === input.name
+                edge.target === node.id && edge.targetHandle === input.name,
         );
 
         if (!connectedEdge) {
@@ -268,7 +274,7 @@ function setUpEnvironmentForPhase(
 function createExecutionEnvironment(
     node: AppNode,
     environment: Environment,
-    logCollector: LogCollector
+    logCollector: LogCollector,
 ): ExecutionEnvironment<any> {
     return {
         getInput(name: string): string {
@@ -296,7 +302,7 @@ async function cleanUpEnvironment(environment: Environment) {
 async function decrementUserCredits(
     userId: string,
     amount: number,
-    logCollector: LogCollector
+    logCollector: LogCollector,
 ): Promise<boolean> {
     try {
         await prisma.userBalance.update({

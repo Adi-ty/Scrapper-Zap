@@ -17,7 +17,7 @@ import UserAvailableCreditsBadge from "./UserAvailableCreditsBadge";
 
 const routes = [
     {
-        href: "",
+        href: "/",
         label: "Home",
         icon: HomeIcon,
     },
@@ -41,9 +41,12 @@ const routes = [
 function Sidebar() {
     const pathname = usePathname();
     const activeRoute =
-        routes.find(
-            (route) => route.href.length > 0 && pathname.includes(route.href)
-        ) || routes[0];
+        routes.find((route) => {
+            if (route.href === "/") {
+                return pathname === "/";
+            }
+            return pathname.includes(route.href);
+        }) || routes[0];
 
     return (
         <div
@@ -84,7 +87,7 @@ export function MobileSidebar() {
     const pathname = usePathname();
     const activeRoute =
         routes.find(
-            (route) => route.href.length > 0 && pathname.includes(route.href)
+            (route) => route.href.length > 0 && pathname.includes(route.href),
         ) || routes[0];
     return (
         <div className="block border-separate bg-background md:hidden">

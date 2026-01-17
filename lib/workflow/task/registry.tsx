@@ -6,6 +6,7 @@ import { WorkflowTask } from "@/types/workflow";
 import { FillInputTask } from "./FillInput";
 import { ClickElementTask } from "./ClickElement";
 import { WaitForElementTask } from "./WaitForElement";
+import { DeliverViaWebhookTask } from "./DeliverViaWebhook";
 
 type Registry = {
     [k in TaskType]: WorkflowTask & { type: k }; // Ensure that the type field in the task object is the same as the key in the registry
@@ -18,4 +19,5 @@ export const TaskRegistry: Registry = {
     FILL_INPUT: FillInputTask,
     CLICK_ELEMENT: ClickElementTask,
     WAIT_FOR_ELEMENT: WaitForElementTask,
+    DELIVER_VIA_WEBHOOK: DeliverViaWebhookTask,
 };

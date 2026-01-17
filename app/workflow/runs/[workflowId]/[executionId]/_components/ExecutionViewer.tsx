@@ -65,7 +65,7 @@ export default function ExecutionViewer({
     });
 
     const phaseDetails = useQuery({
-        queryKey: ["phaseDetails", selectedPhase], // selectedPhase is the key => phaseDetails changes when selectedPhase changes
+        queryKey: ["phaseDetails", selectedPhase, query.data?.status],
         enabled: selectedPhase !== null,
         queryFn: () => GetWorkflowPhaseDetails(selectedPhase!),
     });
@@ -76,21 +76,21 @@ export default function ExecutionViewer({
         const phases = query.data?.phases || [];
         if (isRunning) {
             const phaseToSelect = phases.toSorted((a, b) =>
-                a.startedAt! > b.startedAt! ? -1 : 1
+                a.startedAt! > b.startedAt! ? -1 : 1,
             )[0];
             setSelectedPhase(phaseToSelect.id);
             return;
         }
 
         const phaseToSelect = phases.toSorted((a, b) =>
-            a.completedAt! > b.completedAt! ? -1 : 1
+            a.completedAt! > b.completedAt! ? -1 : 1,
         )[0];
         setSelectedPhase(phaseToSelect.id);
     }, [query.data?.phases, isRunning, setSelectedPhase]);
 
     const duration = DatesToDurationString(
         query.data?.completedAt,
-        query.data?.startedAt
+        query.data?.startedAt,
     );
 
     const creditsConsumed = GetPhasesTotalCost(query.data?.phases || []);
@@ -129,7 +129,7 @@ export default function ExecutionViewer({
                                           new Date(query.data.startedAt),
                                           {
                                               addSuffix: true,
-                                          }
+                                          },
                                       )
                                     : "-"}
                             </span>
@@ -238,7 +238,7 @@ export default function ExecutionViewer({
                                 <span>
                                     {DatesToDurationString(
                                         phaseDetails.data?.completedAt,
-                                        phaseDetails.data?.startedAt
+                                        phaseDetails.data?.startedAt,
                                     ) || "-"}
                                 </span>
                             </Badge>
@@ -372,7 +372,7 @@ function LogViewer({ logs }: { logs: ExecutionLog[] | undefined }) {
                                         (log.logLevel as LogLevel) ===
                                             "error" && "text-destructive",
                                         (log.logLevel as LogLevel) === "info" &&
-                                            "text-primary"
+                                            "text-primary",
                                     )}
                                 >
                                     {log.logLevel}

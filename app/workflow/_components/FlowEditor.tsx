@@ -64,7 +64,7 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
         (event: DragEvent) => {
             event.preventDefault();
             const taskType = event.dataTransfer.getData(
-                "application/reactflow"
+                "application/reactflow",
             );
             if (typeof taskType === undefined || !taskType) return;
 
@@ -76,7 +76,7 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
             const newNode = CreateFlowNode(taskType as TaskType, position);
             setNodes((prev) => prev.concat(newNode));
         },
-        [screenToFlowPosition, setNodes]
+        [screenToFlowPosition, setNodes],
     );
 
     const onConnect = useCallback(
@@ -94,7 +94,7 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
                 },
             });
         },
-        [setEdges, updateNodeData, nodes]
+        [setEdges, updateNodeData, nodes],
     );
 
     const isValidConnection = useCallback(
@@ -104,19 +104,19 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
 
             // Prevent connecting if taskParam is not of same type
             const sourceNode = nodes.find(
-                (node) => node.id === connection.source
+                (node) => node.id === connection.source,
             );
             const targetNode = nodes.find(
-                (node) => node.id === connection.target
+                (node) => node.id === connection.target,
             );
             if (!sourceNode || !targetNode) return false; // Source or target node not found
             const sourceTask = TaskRegistry[sourceNode.data.type];
             const targetTask = TaskRegistry[targetNode.data.type];
             const output = sourceTask.outputs.find(
-                (out) => out.name === connection.sourceHandle
+                (out) => out.name === connection.sourceHandle,
             );
             const input = targetTask.inputs.find(
-                (inp) => inp.name === connection.targetHandle
+                (inp) => inp.name === connection.targetHandle,
             );
 
             if (input?.type !== output?.type) return false; // Input and output type mismatch
@@ -137,7 +137,7 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
 
             return !detectedCycle;
         },
-        [nodes, edges]
+        [nodes, edges],
     );
 
     return (
@@ -163,12 +163,19 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
                     nodeStrokeWidth={3}
                     pannable
                     zoomable
+                    style={{
+                        width: 150,
+                        height: 100,
+                        backgroundColor: "hsl(var(--background))",
+                    }}
+                    maskColor="hsl(var(--muted) / 0.5)"
                 />
                 <Controls position="top-left" fitViewOptions={fitViewOptions} />
                 <Background
-                    gap={16}
+                    gap={40}
                     size={1}
                     variant={BackgroundVariant.Lines}
+                    color="hsl(var(--muted-foreground) / 0.2)"
                 />
             </ReactFlow>
         </main>

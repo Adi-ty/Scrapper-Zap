@@ -18,7 +18,11 @@ export default function DeletableEdge(props: EdgeProps) {
             <BaseEdge
                 path={edgePath}
                 markerEnd={props.markerEnd}
-                style={props.style}
+                style={{
+                    ...props.style,
+                    stroke: "cornflowerblue",
+                    strokeWidth: 3,
+                }}
             />
             <EdgeLabelRenderer>
                 <div
@@ -34,7 +38,7 @@ export default function DeletableEdge(props: EdgeProps) {
                         className="w-5 h-5 border-cursor rounded-full text-xs leading-none hover:shadow-lg"
                         onClick={() => {
                             setEdges((edges) =>
-                                edges.filter((edge) => edge.id !== props.id)
+                                edges.filter((edge) => edge.id !== props.id),
                             );
                         }}
                     >

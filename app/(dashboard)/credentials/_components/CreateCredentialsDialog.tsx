@@ -1,6 +1,5 @@
 "use client";
 import { CreateCredential } from "@/actions/credentials/createCredential";
-import { createWorkflow } from "@/actions/workflows/createWorkfow";
 import CustomDialogHeader from "@/components/CustomDialogHeader";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -19,10 +18,9 @@ import {
     createCredentialSchema,
     createCredentialSchemaType,
 } from "@/schemas/credential";
-import { createWorkflowSchemaType } from "@/schemas/workflow";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { Layers2, Loader2, Shield } from "lucide-react";
+import { Loader2, Shield } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -41,6 +39,8 @@ function CreateCredentialsDialog({ triggerText }: { triggerText?: string }) {
             toast.success("Credential created successfully", {
                 id: "create-credential",
             });
+            form.reset();
+            setOpen(false);
         },
         onError: () => {
             toast.error("Failed to create credential", {
@@ -60,13 +60,7 @@ function CreateCredentialsDialog({ triggerText }: { triggerText?: string }) {
     );
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={(open) => {
-                form.reset();
-                setOpen(open);
-            }}
-        >
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button>{triggerText ?? "Create Credential"}</Button>
             </DialogTrigger>

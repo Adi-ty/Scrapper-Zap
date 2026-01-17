@@ -119,6 +119,15 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
                 (inp) => inp.name === connection.targetHandle,
             );
 
+            console.log("@@@Connection attempt:", {
+                sourceHandle: connection.sourceHandle,
+                targetHandle: connection.targetHandle,
+                output,
+                input,
+                outputType: output?.type,
+                inputType: input?.type,
+            });
+
             if (input?.type !== output?.type) return false; // Input and output type mismatch
 
             // Prevent connecting if it creates a cycle

@@ -1,13 +1,11 @@
 import { TaskParamType, TaskType } from "@/types/task";
 import { WorkflowTask } from "@/types/workflow";
-import { MousePointerClick } from "lucide-react";
+import { BrainCircuit, MousePointerClick } from "lucide-react";
 
 export const ExtractDataWithAITask = {
     type: TaskType.EXTRACT_DATA_WITH_AI,
     label: "Extract Data with AI",
-    icon: (props) => (
-        <MousePointerClick className="stroke-rose-400" {...props} />
-    ),
+    icon: (props) => <BrainCircuit className="stroke-pink-400" {...props} />,
     isEntryPoint: false,
     credits: 4,
     inputs: [

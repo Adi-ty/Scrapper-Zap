@@ -34,6 +34,9 @@ export default function TaskMenu() {
                             taskType={TaskType.EXTRACT_TEXT_FROM_ELEMENT}
                         />
                         <TaskMenuBtn taskType={TaskType.EXTRACT_DATA_WITH_AI} />
+                        <TaskMenuBtn
+                            taskType={TaskType.READ_PROPERTY_FROM_JSON}
+                        />
                     </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="interactions">
